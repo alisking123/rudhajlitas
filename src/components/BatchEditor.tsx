@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { ProcessedImage, ImageProcessingSettings } from "@/lib/types";
 
 interface BatchEditorProps {
@@ -41,7 +41,7 @@ export function BatchEditor({ images: initialImages }: BatchEditorProps) {
 
   const currentImage = images[currentIndex];
 
-  const drawCanvas = () => {
+  const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const overlayCanvas = overlayCanvasRef.current;
     if (!canvas || !overlayCanvas || !currentImage) return;
@@ -102,15 +102,14 @@ export function BatchEditor({ images: initialImages }: BatchEditorProps) {
     overlayCtx.strokeStyle = "#3b82f6";
     overlayCtx.lineWidth = Math.max(2, img.width / 400); // Dinamikus vonalvastagság
     overlayCtx.strokeRect(crop.left, crop.top, cw, ch);
-  };
+  }, [currentImage, settings]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const timer = setTimeout(() => {
       drawCanvas();
     }, 50);
     return () => clearTimeout(timer);
-  }, [currentIndex, settings, currentImage]);
+  }, [currentIndex, settings, currentImage, drawCanvas]);
 
   // Eraser functionality
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
